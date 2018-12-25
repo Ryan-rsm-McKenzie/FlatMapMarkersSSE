@@ -7,3 +7,8 @@
 
 ## End User Dependencies
 * [SKSE64](https://skse.silverlock.org/)
+
+## Settings
+Setting | Description
+--- | ---
+`markerHeight` | The Z-height for all map markers to be on.

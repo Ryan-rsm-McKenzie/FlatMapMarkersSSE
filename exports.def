@@ -1,0 +1,4 @@
+LIBRARY	"FlatMapMarkersSSE"
+EXPORTS
+SKSEPlugin_Query
+SKSEPlugin_Load

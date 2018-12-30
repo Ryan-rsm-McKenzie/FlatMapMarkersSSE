@@ -4,12 +4,30 @@
 
 #include <ShlObj.h>  // CSIDL_MYDOCUMENTS
 
+#include "Events.h"  // g_menuOpenCloseEventHandler
 #include "Hooks.h"  // InstallHooks
 #include "Settings.h"  // Settings
 #include "version.h"  // FLATMAPMARKERSSSE_VERSION_VERSTRING, FLATMAPMARKERSSSE_VERSION_MAJOR
 
+#include "RE/MenuManager.h"  // MenuManager
 
-static PluginHandle g_pluginHandle = kPluginHandle_Invalid;
+
+static PluginHandle				g_pluginHandle = kPluginHandle_Invalid;
+static SKSEMessagingInterface*	g_messaging = 0;
+
+
+void MessageHandler(SKSEMessagingInterface::Message* a_msg)
+{
+	switch (a_msg->type) {
+	case SKSEMessagingInterface::kMessage_DataLoaded:
+	{
+		RE::MenuManager* mm = RE::MenuManager::GetSingleton();
+		mm->GetMenuOpenCloseEventSource()->AddEventSink(&g_menuOpenCloseEventHandler);
+		_MESSAGE("[MESSAGE] Registered menu open/close event handler");
+		break;
+	}
+	}
+}
 
 
 extern "C" {
@@ -56,6 +74,15 @@ extern "C" {
 			_MESSAGE("[MESSAGE] Branch trampoline creation successful");
 		} else {
 			_MESSAGE("[MESSAGE] Branch trampoline creation failed!\n");
+			return false;
+		}
+
+
+		g_messaging = (SKSEMessagingInterface*)a_skse->QueryInterface(kInterface_Messaging);
+		if (g_messaging->RegisterListener(g_pluginHandle, "SKSE", MessageHandler)) {
+			_MESSAGE("[MESSAGE] Messaging interface registration successful");
+		} else {
+			_FATALERROR("[FATAL ERROR] Messaging interface registration failed!\n");
 			return false;
 		}
 

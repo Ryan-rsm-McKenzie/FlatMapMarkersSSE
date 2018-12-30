@@ -14,7 +14,9 @@
 
 void Hook_WorldPtToScreenPt3(RE::NiCamera* a_camera, RE::NiPoint3& a_in, float& a_xOut, float& a_yOut, float& a_zOut, float a_zeroTolerance)
 {
-	a_in.z = Settings::markerHeight;
+	if (Settings::enabled) {
+		a_in.z = Settings::markerHeight;
+	}
 	RE::WorldPtToScreenPt3(a_camera->worldToCam, a_camera->port, a_in, a_xOut, a_yOut, a_zOut, a_zeroTolerance);
 }
 

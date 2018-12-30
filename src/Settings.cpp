@@ -1,5 +1,8 @@
 #include "Settings.h"
 
+#include <map>  // map
+#include <utility>  // pair
+
 
 bool Settings::loadSettings(bool a_dumpParse)
 {
@@ -8,4 +11,7 @@ bool Settings::loadSettings(bool a_dumpParse)
 }
 
 
-fSetting Settings::markerHeight("markerHeight", true, 180000.0);
+aSetting<nlohmann::json>							Settings::whiteListedWorldSpaces("whiteListedWorldSpaces", false);
+std::map < std::uint32_t, std::pair<bool, float>>	Settings::worldSpaces;
+float												Settings::markerHeight = 180000.0;
+bool												Settings::enabled = false;

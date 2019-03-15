@@ -20,12 +20,12 @@ void MessageHandler(SKSEMessagingInterface::Message* a_msg)
 {
 	switch (a_msg->type) {
 	case SKSEMessagingInterface::kMessage_DataLoaded:
-	{
-		RE::MenuManager* mm = RE::MenuManager::GetSingleton();
-		mm->GetMenuOpenCloseEventSource()->AddEventSink(&g_menuOpenCloseEventHandler);
-		_MESSAGE("[MESSAGE] Registered menu open/close event handler");
+		{
+			RE::MenuManager* mm = RE::MenuManager::GetSingleton();
+			mm->GetMenuOpenCloseEventSource()->AddEventSink(&g_menuOpenCloseEventHandler);
+			_MESSAGE("[MESSAGE] Registered menu open/close event handler");
+		}
 		break;
-	}
 	}
 }
 
@@ -50,7 +50,7 @@ extern "C" {
 			return false;
 		}
 
-		if (a_skse->runtimeVersion != RUNTIME_VERSION_1_5_62) {
+		if (a_skse->runtimeVersion != RUNTIME_VERSION_1_5_73) {
 			_FATALERROR("[FATAL ERROR] Unsupported runtime version %08X!\n", a_skse->runtimeVersion);
 			return false;
 		}

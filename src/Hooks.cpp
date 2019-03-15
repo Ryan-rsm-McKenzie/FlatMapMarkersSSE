@@ -23,7 +23,8 @@ void Hook_WorldPtToScreenPt3(RE::NiCamera* a_camera, RE::NiPoint3& a_in, float& 
 
 void InstallHooks()
 {
-	constexpr uintptr_t TARGET = 0x008E6330;
+	// E8 ? ? ? ? 8B 0D ? ? ? ? 65 48 8B 04 25 58 00 00 00 BE 68 07 00 00 48 8B 3C C8 8B 1C 37 89 5C 24 70
+	constexpr uintptr_t TARGET = 0x008E6140;	// 1_5_73
 	RelocAddr<uintptr_t> targetCall(TARGET + 0x22F);
 	g_branchTrampoline.Write5Call(targetCall.GetUIntPtr(), GetFnAddr(&Hook_WorldPtToScreenPt3));
 	_DMESSAGE("[DEBUG] Hooked function call");

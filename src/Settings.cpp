@@ -11,7 +11,7 @@ bool Settings::loadSettings(bool a_dumpParse)
 }
 
 
-aSetting<nlohmann::json>							Settings::whiteListedWorldSpaces("whiteListedWorldSpaces", false);
-std::map < std::uint32_t, std::pair<bool, float>>	Settings::worldSpaces;
-float												Settings::markerHeight = 180000.0;
-bool												Settings::enabled = false;
+decltype(Settings::whiteListedWorldSpaces)	Settings::whiteListedWorldSpaces("whiteListedWorldSpaces", false);
+decltype(Settings::worldSpaces)				Settings::worldSpaces;
+decltype(Settings::markerHeight)			Settings::markerHeight = 180000.0;
+decltype(Settings::enabled)					Settings::enabled = false;

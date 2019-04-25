@@ -1,19 +1,20 @@
 #pragma once
 
-#include "RE/BSTEvent.h"  // BSTEventSink, EventResult, BSTEventSource
-
-namespace RE
-{
-	class MenuOpenCloseEvent;
-}
+#include "RE/Skyrim.h"
 
 
 class MenuOpenCloseEventHandler : public RE::BSTEventSink<RE::MenuOpenCloseEvent>
 {
 public:
-	virtual ~MenuOpenCloseEventHandler();
+	static MenuOpenCloseEventHandler* GetSingleton();
 	virtual	RE::EventResult	ReceiveEvent(RE::MenuOpenCloseEvent* a_event, RE::BSTEventSource<RE::MenuOpenCloseEvent>* a_eventSource) override;
+
+private:
+	MenuOpenCloseEventHandler() = default;
+	MenuOpenCloseEventHandler(const MenuOpenCloseEventHandler&) = delete;
+	MenuOpenCloseEventHandler(MenuOpenCloseEventHandler&&) = delete;
+	virtual ~MenuOpenCloseEventHandler() = default;
+
+	MenuOpenCloseEventHandler& operator=(const MenuOpenCloseEventHandler&) = delete;
+	MenuOpenCloseEventHandler& operator=(MenuOpenCloseEventHandler&&) = delete;
 };
-
-
-extern MenuOpenCloseEventHandler g_menuOpenCloseEventHandler;

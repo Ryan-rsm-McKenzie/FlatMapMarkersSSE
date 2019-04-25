@@ -1,5 +1,4 @@
-﻿#include "skse64/PluginAPI.h"  // PluginHandle, SKSEInterface, PluginInfo
-#include "skse64_common/BranchTrampoline.h"  // g_branchTrampoline
+﻿#include "skse64_common/BranchTrampoline.h"  // g_branchTrampoline
 #include "skse64_common/skse_version.h"  // RUNTIME_VERSION
 
 #include <ShlObj.h>  // CSIDL_MYDOCUMENTS
@@ -7,51 +6,47 @@
 #include "Events.h"  // g_menuOpenCloseEventHandler
 #include "Hooks.h"  // InstallHooks
 #include "Settings.h"  // Settings
-#include "version.h"  // FLATMAPMARKERSSSE_VERSION_VERSTRING, FLATMAPMARKERSSSE_VERSION_MAJOR
+#include "version.h"  // VERSION_VERSTRING, VERSION_MAJOR
 
-#include "RE/MenuManager.h"  // MenuManager
-
-
-static PluginHandle				g_pluginHandle = kPluginHandle_Invalid;
-static SKSEMessagingInterface*	g_messaging = 0;
+#include "SKSE/API.h"
+#include "RE/Skyrim.h"
 
 
-void MessageHandler(SKSEMessagingInterface::Message* a_msg)
+namespace
 {
-	switch (a_msg->type) {
-	case SKSEMessagingInterface::kMessage_DataLoaded:
-		{
-			RE::MenuManager* mm = RE::MenuManager::GetSingleton();
-			mm->GetMenuOpenCloseEventSource()->AddEventSink(&g_menuOpenCloseEventHandler);
-			_MESSAGE("[MESSAGE] Registered menu open/close event handler");
+	void MessageHandler(SKSE::MessagingInterface::Message* a_msg)
+	{
+		switch (a_msg->type) {
+		case SKSE::MessagingInterface::kDataLoaded:
+			{
+				auto mm = RE::MenuManager::GetSingleton();
+				mm->GetMenuOpenCloseEventSource()->AddEventSink(MenuOpenCloseEventHandler::GetSingleton());
+				_MESSAGE("[MESSAGE] Registered menu open/close event handler");
+			}
+			break;
 		}
-		break;
 	}
 }
 
 
 extern "C" {
-	bool SKSEPlugin_Query(const SKSEInterface* a_skse, PluginInfo* a_info)
+	bool SKSEPlugin_Query(const SKSE::QueryInterface* a_skse, SKSE::PluginInfo* a_info)
 	{
 		gLog.OpenRelative(CSIDL_MYDOCUMENTS, "\\My Games\\Skyrim Special Edition\\SKSE\\FlatMapMarkersSSE.log");
 		gLog.SetPrintLevel(IDebugLog::kLevel_DebugMessage);
 		gLog.SetLogLevel(IDebugLog::kLevel_DebugMessage);
 
-		_MESSAGE("FlatMapMarkersSSE v%s", FLATMAPMARKERSSSE_VERSION_VERSTRING);
+		_MESSAGE("FlatMapMarkersSSE v%s", FLTM_VERSION_VERSTRING);
 
-		a_info->infoVersion = PluginInfo::kInfoVersion;
+		a_info->infoVersion = SKSE::PluginInfo::kVersion;
 		a_info->name = "FlatMapMarkersSSE";
-		a_info->version = FLATMAPMARKERSSSE_VERSION_MAJOR;
+		a_info->version = FLTM_VERSION_MAJOR;
 
-		g_pluginHandle = a_skse->GetPluginHandle();
-
-		if (a_skse->isEditor) {
+		if (a_skse->IsEditor()) {
 			_FATALERROR("[FATAL ERROR] Loaded in editor, marking as incompatible!\n");
 			return false;
-		}
-
-		if (a_skse->runtimeVersion != RUNTIME_VERSION_1_5_73) {
-			_FATALERROR("[FATAL ERROR] Unsupported runtime version %08X!\n", a_skse->runtimeVersion);
+		} else if (a_skse->RuntimeVersion() != RUNTIME_VERSION_1_5_73) {
+			_FATALERROR("[FATAL ERROR] Unsupported runtime version %08X!\n", a_skse->RuntimeVersion());
 			return false;
 		}
 
@@ -59,9 +54,13 @@ extern "C" {
 	}
 
 
-	bool SKSEPlugin_Load(const SKSEInterface* a_skse)
+	bool SKSEPlugin_Load(const SKSE::LoadInterface* a_skse)
 	{
 		_MESSAGE("[MESSAGE] FlatMapMarkersSSE loaded");
+
+		if (!SKSE::Init(a_skse)) {
+			return false;
+		}
 
 		if (Settings::loadSettings()) {
 			_MESSAGE("[MESSAGE] Settings successfully loaded");
@@ -77,9 +76,8 @@ extern "C" {
 			return false;
 		}
 
-
-		g_messaging = (SKSEMessagingInterface*)a_skse->QueryInterface(kInterface_Messaging);
-		if (g_messaging->RegisterListener(g_pluginHandle, "SKSE", MessageHandler)) {
+		auto messaging = SKSE::GetMessagingInterface();
+		if (messaging->RegisterListener("SKSE", MessageHandler)) {
 			_MESSAGE("[MESSAGE] Messaging interface registration successful");
 		} else {
 			_FATALERROR("[FATAL ERROR] Messaging interface registration failed!\n");

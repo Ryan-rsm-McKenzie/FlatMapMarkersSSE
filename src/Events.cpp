@@ -3,16 +3,14 @@
 #include "FNV1A.h"  // hash_32_fnv1a
 #include "Settings.h"  // worldSpaces
 
-#include "RE/BSTEvent.h"  // EventResult, BSTEventSource
-#include "RE/MapMenu.h"  // MapMenu
-#include "RE/MenuManager.h"  // MenuManager
-#include "RE/MenuOpenCloseEvent.h"  // MenuOpenCloseEvent
-#include "RE/TESWorldSpace.h"  // TESWorldSpace
-#include "RE/UIStringHolder.h"  // UIStringHolder
+#include "RE/Skyrim.h"
 
 
-MenuOpenCloseEventHandler::~MenuOpenCloseEventHandler()
-{}
+MenuOpenCloseEventHandler* MenuOpenCloseEventHandler::GetSingleton()
+{
+	static MenuOpenCloseEventHandler singleton;
+	return &singleton;
+}
 
 
 RE::EventResult	MenuOpenCloseEventHandler::ReceiveEvent(RE::MenuOpenCloseEvent* a_event, RE::BSTEventSource<RE::MenuOpenCloseEvent>* a_eventSource)
@@ -24,9 +22,9 @@ RE::EventResult	MenuOpenCloseEventHandler::ReceiveEvent(RE::MenuOpenCloseEvent* 
 		return EventResult::kContinue;
 	}
 
-	RE::MenuManager* mm = RE::MenuManager::GetSingleton();
-	RE::MapMenu* map = mm->GetMenu<RE::MapMenu>(uiStrHolder->mapMenu);
-	RE::TESWorldSpace* worldSpace = map ? map->worldSpace : 0;
+	auto mm = RE::MenuManager::GetSingleton();
+	auto map = mm->GetMenu<RE::MapMenu>(uiStrHolder->mapMenu);
+	auto worldSpace = map ? map->worldSpace : 0;
 	if (!worldSpace) {
 		return EventResult::kContinue;
 	}
@@ -42,6 +40,3 @@ RE::EventResult	MenuOpenCloseEventHandler::ReceiveEvent(RE::MenuOpenCloseEvent* 
 
 	return EventResult::kContinue;
 }
-
-
-MenuOpenCloseEventHandler g_menuOpenCloseEventHandler;

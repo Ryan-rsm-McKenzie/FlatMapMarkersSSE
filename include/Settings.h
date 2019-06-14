@@ -5,7 +5,6 @@
 #include <utility>  // pair
 
 #include "FNV1A.h"  // hash_32_fnv1a
-#include "json.hpp"  // json
 #include "Json2Settings.h"  // Json2Settings
 
 

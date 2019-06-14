@@ -29,7 +29,7 @@ RE::EventResult	MenuOpenCloseEventHandler::ReceiveEvent(RE::MenuOpenCloseEvent* 
 		return EventResult::kContinue;
 	}
 
-	std::uint32_t hash = hash_32_fnv1a(worldSpace->editorId.c_str(), worldSpace->editorId.length());
+	std::uint32_t hash = hash_32_fnv1a(worldSpace->editorID.c_str(), worldSpace->editorID.length());
 	auto& it = Settings::worldSpaces.find(hash);
 	if (it != Settings::worldSpaces.end()) {
 		Settings::enabled = it->second.first;

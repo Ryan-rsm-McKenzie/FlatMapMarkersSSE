@@ -16,11 +16,11 @@ public:
 	static bool	loadSettings(bool a_dumpParse = false);
 
 
-	static aSetting<nlohmann::json>								whiteListedWorldSpaces;
+	static aSetting<nlohmann::json>							whiteListedWorldSpaces;
 
-	static std::map < std::uint32_t, std::pair<bool, float>>	worldSpaces;
-	static float												markerHeight;
-	static bool													enabled;
+	static std::map<std::uint32_t, std::pair<bool, float>>	worldSpaces;
+	static float											markerHeight;
+	static bool												enabled;
 
 private:
 	static constexpr char* FILE_NAME = "Data\\SKSE\\Plugins\\FlatMapMarkersSSE.json";

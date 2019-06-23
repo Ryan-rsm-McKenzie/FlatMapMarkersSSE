@@ -1,13 +1,9 @@
 #include "Settings.h"
 
-#include <map>  // map
-#include <utility>  // pair
-
 
 bool Settings::loadSettings(bool a_dumpParse)
 {
-	setFileName(FILE_NAME);
-	return Json2Settings::Settings::loadSettings(a_dumpParse);
+	return Json2Settings::Settings::loadSettings(FILE_NAME, false, a_dumpParse);
 }
 
 

@@ -26,5 +26,5 @@ void InstallHooks()
 	constexpr std::uintptr_t ADDR = 0x008E6140;	// 1_5_80
 	REL::Offset<std::uintptr_t> targetCall(ADDR + 0x22F);
 	g_branchTrampoline.Write5Call(targetCall.GetAddress(), unrestricted_cast<std::uintptr_t>(&Hook_WorldPtToScreenPt3));
-	_DMESSAGE("[DEBUG] Hooked function call");
+	_DMESSAGE("Hooked function call");
 }

@@ -37,7 +37,7 @@ private:
 
 public:
 	aSetting() = delete;
-	aSetting(std::string a_key, bool a_consoleOK, std::initializer_list<json> a_list = {}) :
+	aSetting(std::string a_key, std::initializer_list<json> a_list = {}, bool a_consoleOK = false) :
 		ISetting(a_key, a_consoleOK),
 		std::vector<json>(a_list)
 	{}

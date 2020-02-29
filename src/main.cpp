@@ -1,10 +1,7 @@
-﻿#include "skse64_common/BranchTrampoline.h"  // g_branchTrampoline
-#include "skse64_common/skse_version.h"  // RUNTIME_VERSION
-
-#include "Events.h"  // g_menuOpenCloseEventHandler
-#include "Hooks.h"  // InstallHooks
-#include "Settings.h"  // Settings
-#include "version.h"  // VERSION_VERSTRING, VERSION_MAJOR
+﻿#include "Events.h"
+#include "Hooks.h"
+#include "Settings.h"
+#include "version.h"
 
 #include "SKSE/API.h"
 #include "RE/Skyrim.h"
@@ -17,8 +14,8 @@ namespace
 		switch (a_msg->type) {
 		case SKSE::MessagingInterface::kDataLoaded:
 			{
-				auto mm = RE::MenuManager::GetSingleton();
-				mm->GetMenuOpenCloseEventSource()->AddEventSink(MenuOpenCloseEventHandler::GetSingleton());
+				auto ui = RE::UI::GetSingleton();
+				ui->AddEventSink(MenuOpenCloseEventHandler::GetSingleton());
 				_MESSAGE("Registered menu open/close event handler");
 			}
 			break;
@@ -34,6 +31,7 @@ extern "C" {
 		SKSE::Logger::SetPrintLevel(SKSE::Logger::Level::kDebugMessage);
 		SKSE::Logger::SetFlushLevel(SKSE::Logger::Level::kDebugMessage);
 		SKSE::Logger::UseLogStamp(true);
+		SKSE::Logger::TrackTrampolineStats(true);
 
 		_MESSAGE("FlatMapMarkersSSE v%s", FLTM_VERSION_VERSTRING);
 
@@ -46,12 +44,9 @@ extern "C" {
 			return false;
 		}
 
-		switch (a_skse->RuntimeVersion()) {
-		case RUNTIME_VERSION_1_5_73:
-		case RUNTIME_VERSION_1_5_80:
-			break;
-		default:
-			_FATALERROR("Unsupported runtime version %08X!\n", a_skse->RuntimeVersion());
+		auto ver = a_skse->RuntimeVersion();
+		if (ver <= SKSE::RUNTIME_1_5_39) {
+			_FATALERROR("Unsupported runtime version %s!", ver.GetString().c_str());
 			return false;
 		}
 
@@ -67,30 +62,21 @@ extern "C" {
 			return false;
 		}
 
-		if (Settings::loadSettings()) {
-			_MESSAGE("Settings successfully loaded");
-		} else {
-			_FATALERROR("Settings failed to load!\n");
+		if (!Settings::LoadSettings()) {
+			_FATALERROR("Settings failed to load!");
 			return false;
 		}
 
-		if (g_branchTrampoline.Create(1024 * 8)) {
-			_MESSAGE("Branch trampoline creation successful");
-		} else {
-			_MESSAGE("Branch trampoline creation failed!\n");
+		if (!SKSE::AllocTrampoline(1 << 4)) {
 			return false;
 		}
 
 		auto messaging = SKSE::GetMessagingInterface();
-		if (messaging->RegisterListener("SKSE", MessageHandler)) {
-			_MESSAGE("Messaging interface registration successful");
-		} else {
-			_FATALERROR("Messaging interface registration failed!\n");
+		if (!messaging->RegisterListener("SKSE", MessageHandler)) {
 			return false;
 		}
 
-		InstallHooks();
-		_MESSAGE("Hooks installed");
+		Hooks::Install();
 
 		return true;
 	}

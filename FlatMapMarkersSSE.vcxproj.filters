@@ -38,9 +38,6 @@
     <ClInclude Include="include\Events.h">
       <Filter>include</Filter>
     </ClInclude>
-    <ClInclude Include="include\FNV1A.h">
-      <Filter>include</Filter>
-    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ResourceCompile Include="version.rc" />

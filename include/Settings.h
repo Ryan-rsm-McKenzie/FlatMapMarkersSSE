@@ -1,81 +1,57 @@
 #pragma once
 
-#include <vector>  // vector
-#include <map>  // map
-#include <utility>  // pair
+#include <map>
+#include <utility>
 
-#include "FNV1A.h"  // hash_32_fnv1a
-#include "Json2Settings.h"  // Json2Settings
+#include "Json2Settings.h"
 
 
-class Settings : public Json2Settings::Settings
+namespace J2S = Json2Settings;
+
+
+struct WhiteListedWorldSpace
 {
-public:
-	Settings() = delete;
-
-	static bool	loadSettings(bool a_dumpParse = false);
-
-
-	static aSetting<nlohmann::json>							whiteListedWorldSpaces;
-
-	static std::map<std::uint32_t, std::pair<bool, float>>	worldSpaces;
-	static float											markerHeight;
-	static bool												enabled;
-
-private:
-	static constexpr char* FILE_NAME = "Data\\SKSE\\Plugins\\FlatMapMarkersSSE.json";
+	J2S::string_t name;
+	J2S::string_t editorID;
+	J2S::float_t markerHeight;
+	J2S::boolean_t enabled;
 };
 
 
-template <>
-class aSetting<nlohmann::json> :
-	public ISetting,
-	public std::vector<nlohmann::json>
+inline void from_json(const nlohmann::json& a_json, WhiteListedWorldSpace& a_data)
 {
-private:
-	using json = nlohmann::json;
+	a_json.at("name").get_to(a_data.name);
+	a_json.at("editorID").get_to(a_data.editorID);
+	a_json.at("markerHeight").get_to(a_data.markerHeight);
+	a_json.at("enabled").get_to(a_data.enabled);
+}
 
+
+class Settings
+{
 public:
-	aSetting() = delete;
-	aSetting(std::string a_key, std::initializer_list<json> a_list = {}, bool a_consoleOK = false) :
-		ISetting(a_key, a_consoleOK),
-		std::vector<json>(a_list)
-	{}
-
-	virtual ~aSetting()
-	{}
-
-	virtual void assign(json& a_val) override
+	struct CIComp
 	{
-		clear();
-		std::string editorID;
-		bool enabled;
-		float markerHeight;
-		for (auto& val : a_val) {
-			emplace_back(val);
-			editorID = val.find("editorID").value();
-			enabled = val.find("enabled").value();
-			markerHeight = val.find("markerHeight").value();
-			Settings::worldSpaces.emplace(hash_32_fnv1a(editorID), std::make_pair(enabled, markerHeight));
-		}
-	}
+		using value_type = J2S::string_t;
 
-	virtual void dump() override
-	{
-		_DMESSAGE("%s: [", _key.c_str());
-		for (auto& it = begin(); it != end(); ++it) {
-			_DMESSAGE("\t%s", it->dump(4).c_str());
-		}
-		_DMESSAGE("]");
-	}
 
-	virtual std::string	getValueAsString() const override
-	{
-		std::string str = _key + ": [";
-		for (auto& it = begin(); it != end(); ++it) {
-			str += "\t" + it->dump(4) + "\n";
+		inline bool operator()(const value_type& a_lhs, const value_type& a_rhs) const
+		{
+			return _stricmp(a_lhs.c_str(), a_rhs.c_str()) < 0;
 		}
-		str += "]";
-		return str;
-	}
+	};
+
+
+	Settings() = delete;
+
+	static bool	LoadSettings(bool a_dumpParse = false);
+
+
+	static std::map<J2S::string_t, std::pair<J2S::boolean_t, J2S::float_t>, CIComp> worldSpaces;
+	static inline J2S::float_t markerHeight = 180000.0;
+	static inline bool enabled = false;
+
+private:
+	static constexpr char FILE_NAME[] = "Data\\SKSE\\Plugins\\FlatMapMarkersSSE.json";
+	static J2S::aSetting<WhiteListedWorldSpace> whiteListedWorldSpaces;
 };

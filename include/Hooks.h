@@ -1,4 +1,7 @@
 #pragma once
 
 
-void InstallHooks();
+namespace Hooks
+{
+	void Install();
+}

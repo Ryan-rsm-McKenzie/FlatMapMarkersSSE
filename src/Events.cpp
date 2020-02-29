@@ -1,36 +1,35 @@
 #include "Events.h"
 
-#include "FNV1A.h"  // hash_32_fnv1a
-#include "Settings.h"  // worldSpaces
+#include <memory>
 
 #include "RE/Skyrim.h"
+
+#include "Settings.h"
 
 
 MenuOpenCloseEventHandler* MenuOpenCloseEventHandler::GetSingleton()
 {
 	static MenuOpenCloseEventHandler singleton;
-	return &singleton;
+	return std::addressof(singleton);
 }
 
 
-RE::EventResult	MenuOpenCloseEventHandler::ReceiveEvent(RE::MenuOpenCloseEvent* a_event, RE::BSTEventSource<RE::MenuOpenCloseEvent>* a_eventSource)
+auto MenuOpenCloseEventHandler::ProcessEvent(const RE::MenuOpenCloseEvent* a_event, [[maybe_unused]] RE::BSTEventSource<RE::MenuOpenCloseEvent>* a_eventSource)
+-> EventResult
 {
-	using RE::EventResult;
-
-	RE::UIStringHolder* uiStrHolder = RE::UIStringHolder::GetSingleton();
-	if (!a_event || !a_event->isOpening || a_event->menuName != uiStrHolder->mapMenu) {
+	auto intfcStr = RE::InterfaceStrings::GetSingleton();
+	if (!a_event || !a_event->opening || a_event->menuName != intfcStr->mapMenu) {
 		return EventResult::kContinue;
 	}
 
-	auto mm = RE::MenuManager::GetSingleton();
-	auto map = mm->GetMenu<RE::MapMenu>(uiStrHolder->mapMenu);
-	auto worldSpace = map ? map->worldSpace : 0;
+	auto mm = RE::UI::GetSingleton();
+	auto map = mm->GetMenu<RE::MapMenu>();
+	auto worldSpace = map ? map->worldSpace : nullptr;
 	if (!worldSpace) {
 		return EventResult::kContinue;
 	}
 
-	std::uint32_t hash = hash_32_fnv1a(worldSpace->editorID.c_str(), worldSpace->editorID.length());
-	auto& it = Settings::worldSpaces.find(hash);
+	auto it = Settings::worldSpaces.find(worldSpace->editorID.c_str());
 	if (it != Settings::worldSpaces.end()) {
 		Settings::enabled = it->second.first;
 		Settings::markerHeight = it->second.second;
